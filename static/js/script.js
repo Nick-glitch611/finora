@@ -72,26 +72,157 @@ function inicializarCadastro() {
     }
 }
 
-function inicializarLogin() {
-    const formulario = document.querySelector(
-        'form[action*="login"]'
+
+function inicializarGastos() {
+    const elementoDados = document.getElementById("dados-gastos");
+    const canvas = document.getElementById("gastosChart");
+
+    const formularioOrcamento = document.querySelector(
+        '.form-panel form[action*="definir_orcamento"]'
     );
 
-    if (!formulario) return;
+    const formularioGasto = document.querySelector(
+        '.form-panel form[action*="adicionar_gasto"]'
+    );
 
-    formulario.addEventListener("submit", (event) => {
-        const usuario = formulario.querySelector("#usuario");
-        const senha = formulario.querySelector("#senha");
+    if (formularioOrcamento) {
+        formularioOrcamento.addEventListener("submit", (event) => {
+            const campo = formularioOrcamento.querySelector(
+                '[name="orcamento"]'
+            );
 
-        if (usuario && !usuario.value.trim()) {
-            event.preventDefault();
-            usuario.reportValidity();
-            return;
-        }
+            if (
+                !campo ||
+                campo.value === "" ||
+                !Number.isFinite(Number(campo.value)) ||
+                Number(campo.value) < 0
+            ) {
+                event.preventDefault();
+                campo?.reportValidity();
+            }
+        });
+    }
 
-        if (senha && !senha.value) {
-            event.preventDefault();
-            senha.reportValidity();
+    if (formularioGasto) {
+        formularioGasto.addEventListener("submit", (event) => {
+            const descricao = formularioGasto.querySelector(
+                '[name="descricao"]'
+            );
+            const valor = formularioGasto.querySelector('[name="valor"]');
+            const categoria = formularioGasto.querySelector(
+                '[name="categoria"]'
+            );
+
+            if (!descricao || !descricao.value.trim()) {
+                event.preventDefault();
+                descricao?.reportValidity();
+                return;
+            }
+
+            if (
+                !valor ||
+                valor.value === "" ||
+                !Number.isFinite(Number(valor.value)) ||
+                Number(valor.value) <= 0
+            ) {
+                event.preventDefault();
+                valor?.reportValidity();
+                return;
+            }
+
+            if (!categoria || !categoria.value) {
+                event.preventDefault();
+                categoria?.reportValidity();
+            }
+        });
+    }
+
+    if (!canvas || !elementoDados) return;
+
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js não foi carregado.");
+        return;
+    }
+
+    let dados;
+
+    try {
+        dados = JSON.parse(elementoDados.textContent);
+    } catch (erro) {
+        console.error("Erro ao ler os dados do gráfico:", erro);
+        return;
+    }
+
+    if (
+        !Array.isArray(dados.categorias) ||
+        !Array.isArray(dados.valores) ||
+        dados.categorias.length !== dados.valores.length
+    ) {
+        console.error("Os dados do gráfico estão em formato inválido.");
+        return;
+    }
+
+    if (dados.categorias.length === 0) return;
+
+    if (canvas.chartInstance) {
+        canvas.chartInstance.destroy();
+    }
+
+    canvas.chartInstance = new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: dados.categorias,
+            datasets: [{
+                label: "Total gasto (R$)",
+                data: dados.valores,
+                backgroundColor: "#3978F6",
+                hoverBackgroundColor: "#60A5FA",
+                borderRadius: 7,
+                borderSkipped: false,
+                maxBarThickness: 48
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (contexto) =>
+                            "R$ " + Number(contexto.parsed.y).toLocaleString(
+                                "pt-BR",
+                                {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }
+                            )
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: "#94A3B8",
+                        callback: (valor) =>
+                            "R$ " + Number(valor).toLocaleString("pt-BR")
+                    },
+                    grid: {
+                        color: "rgba(148, 163, 184, 0.15)"
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: "#94A3B8"
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
         }
     });
 }

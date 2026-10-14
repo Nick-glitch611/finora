@@ -1,7 +1,10 @@
-
 {% extends "base.html" %}
 
 {% block title %}Meus gastos | Finora{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
 <section class="dashboard-header">
@@ -33,21 +36,29 @@
 
 <section class="balance-highlight">
     <p class="balance-label">Saldo disponível no mês</p>
+
     <h2 class="balance-value {% if saldo > 0 %}positive{% elif saldo < 0 %}negative{% else %}zero{% endif %}">
         R$ {{ "%.2f"|format(saldo) }}
     </h2>
-    <p class="balance-description">Orçamento mensal menos total de gastos</p>
+
+    <p class="balance-description">
+        Orçamento mensal menos total de gastos
+    </p>
 </section>
 
 <section class="dashboard-grid">
     <article class="stat-card">
         <p class="stat-label">Orçamento mensal</p>
-        <h3 class="stat-value">R$ {{ "%.2f"|format(orcamento) }}</h3>
+        <h3 class="stat-value">
+            R$ {{ "%.2f"|format(orcamento) }}
+        </h3>
     </article>
 
     <article class="stat-card">
         <p class="stat-label">Total de gastos</p>
-        <h3 class="stat-value">R$ {{ "%.2f"|format(total_gastos) }}</h3>
+        <h3 class="stat-value">
+            R$ {{ "%.2f"|format(total_gastos) }}
+        </h3>
     </article>
 </section>
 
@@ -79,7 +90,11 @@
         <h2>Definir orçamento</h2>
         <p>Estabeleça o limite de gastos para o mês selecionado.</p>
 
-        <form method="POST" action="{{ url_for('definir_orcamento') }}">
+        <form
+            method="POST"
+            action="{{ url_for('definir_orcamento') }}"
+            class="budget-form"
+        >
             <div class="form-group">
                 <label for="orcamento">Orçamento mensal (R$)</label>
                 <input
@@ -104,7 +119,11 @@
         <h2>Adicionar despesa</h2>
         <p>Registre um gasto para acompanhar suas finanças.</p>
 
-        <form method="POST" action="{{ url_for('adicionar_gasto') }}">
+        <form
+            method="POST"
+            action="{{ url_for('adicionar_gasto') }}"
+            class="expense-form"
+        >
             <div class="form-group">
                 <label for="descricao">Descrição</label>
                 <input
@@ -139,7 +158,7 @@
                     type="number"
                     id="valor"
                     name="valor"
-                    placeholder="0,00"
+                    placeholder="0.00"
                     min="0.01"
                     step="0.01"
                     required
@@ -176,7 +195,6 @@
                             method="POST"
                             action="{{ url_for('remover_gasto', gasto_id=gasto.id) }}"
                             class="remove-expense-form"
-                            onsubmit="return confirm('Deseja realmente remover esta despesa?');"
                         >
                             <button type="submit">Remover</button>
                         </form>
