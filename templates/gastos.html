@@ -1,0 +1,194 @@
+
+{% extends "base.html" %}
+
+{% block title %}Meus gastos | Finora{% endblock %}
+
+{% block content %}
+<section class="dashboard-header">
+    <div>
+        <h1>Meu painel financeiro</h1>
+        <p>Acompanhe e organize seus gastos mensais.</p>
+    </div>
+
+    <form method="GET" action="{{ url_for('gastos') }}" class="month-filter">
+        <select name="mes" aria-label="Mês">
+            {% for numero, nome in meses %}
+                <option value="{{ numero }}" {% if numero == mes_atual %}selected{% endif %}>
+                    {{ nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="ano" aria-label="Ano">
+            {% for ano in anos %}
+                <option value="{{ ano }}" {% if ano == ano_atual %}selected{% endif %}>
+                    {{ ano }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Consultar</button>
+    </form>
+</section>
+
+<section class="balance-highlight">
+    <p class="balance-label">Saldo disponível no mês</p>
+    <h2 class="balance-value {% if saldo > 0 %}positive{% elif saldo < 0 %}negative{% else %}zero{% endif %}">
+        R$ {{ "%.2f"|format(saldo) }}
+    </h2>
+    <p class="balance-description">Orçamento mensal menos total de gastos</p>
+</section>
+
+<section class="dashboard-grid">
+    <article class="stat-card">
+        <p class="stat-label">Orçamento mensal</p>
+        <h3 class="stat-value">R$ {{ "%.2f"|format(orcamento) }}</h3>
+    </article>
+
+    <article class="stat-card">
+        <p class="stat-label">Total de gastos</p>
+        <h3 class="stat-value">R$ {{ "%.2f"|format(total_gastos) }}</h3>
+    </article>
+</section>
+
+<section class="chart-panel">
+    <div class="section-heading">
+        <h2>Distribuição dos gastos</h2>
+        <p>Veja como seu dinheiro está distribuído por categoria.</p>
+    </div>
+
+    {% if categorias %}
+        <div class="chart-container">
+            <canvas id="gastosChart"></canvas>
+        </div>
+
+        <script type="application/json" id="dados-gastos">{{ {
+            "categorias": categorias.keys() | list,
+            "valores": categorias.values() | list
+        } | tojson }}</script>
+    {% else %}
+        <div class="empty-state">
+            <p>Você ainda não tem gastos registrados neste mês.</p>
+            <p>Adicione uma despesa para visualizar o gráfico.</p>
+        </div>
+    {% endif %}
+</section>
+
+<section class="forms-grid">
+    <article class="form-panel">
+        <h2>Definir orçamento</h2>
+        <p>Estabeleça o limite de gastos para o mês selecionado.</p>
+
+        <form method="POST" action="{{ url_for('definir_orcamento') }}">
+            <div class="form-group">
+                <label for="orcamento">Orçamento mensal (R$)</label>
+                <input
+                    type="number"
+                    id="orcamento"
+                    name="orcamento"
+                    min="0"
+                    step="0.01"
+                    value="{{ '%.2f'|format(orcamento) }}"
+                    required
+                >
+            </div>
+
+            <input type="hidden" name="mes" value="{{ mes_atual }}">
+            <input type="hidden" name="ano" value="{{ ano_atual }}">
+
+            <button type="submit">Salvar orçamento</button>
+        </form>
+    </article>
+
+    <article class="form-panel">
+        <h2>Adicionar despesa</h2>
+        <p>Registre um gasto para acompanhar suas finanças.</p>
+
+        <form method="POST" action="{{ url_for('adicionar_gasto') }}">
+            <div class="form-group">
+                <label for="descricao">Descrição</label>
+                <input
+                    type="text"
+                    id="descricao"
+                    name="descricao"
+                    placeholder="Ex.: Almoço"
+                    maxlength="100"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="categoria">Categoria</label>
+                <select id="categoria" name="categoria" required>
+                    <option value="">Selecione uma categoria</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Educação">Educação</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Moradia">Moradia</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Compras">Compras</option>
+                    <option value="Contas">Contas</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="valor">Valor (R$)</label>
+                <input
+                    type="number"
+                    id="valor"
+                    name="valor"
+                    placeholder="0,00"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+            </div>
+
+            <input type="hidden" name="mes" value="{{ mes_atual }}">
+            <input type="hidden" name="ano" value="{{ ano_atual }}">
+
+            <button type="submit">Adicionar despesa</button>
+        </form>
+    </article>
+</section>
+
+<section class="expenses-panel">
+    <h2>Despesas registradas</h2>
+    <p>Confira os gastos do mês selecionado.</p>
+
+    {% if gastos %}
+        <div class="expenses-list">
+            {% for gasto in gastos %}
+                <article class="expense-item">
+                    <div class="expense-info">
+                        <h3>{{ gasto.descricao }}</h3>
+                        <p>{{ gasto.categoria }}</p>
+                    </div>
+
+                    <div class="expense-details">
+                        <span class="expense-value">
+                            R$ {{ "%.2f"|format(gasto.valor) }}
+                        </span>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for('remover_gasto', gasto_id=gasto.id) }}"
+                            class="remove-expense-form"
+                            onsubmit="return confirm('Deseja realmente remover esta despesa?');"
+                        >
+                            <button type="submit">Remover</button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Nenhuma despesa registrada neste mês.</p>
+            <p>Use o formulário acima para adicionar seu primeiro gasto.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

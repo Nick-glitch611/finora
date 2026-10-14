@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Finora | Organize suas finanças{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <span class="hero-label">ORGANIZE. PLANEJE. EVOLUA.</span>
+
+        <h1>
+            Tenha controle sobre
+            <span>seu dinheiro.</span>
+        </h1>
+
+        <p>
+            Organize seus gastos mensais, acompanhe para onde seu dinheiro
+            está indo e tome decisões financeiras com mais clareza.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{{ url_for('cadastro') }}" class="primary-button">
+                Criar minha conta
+            </a>
+
+            <a href="{{ url_for('login') }}" class="secondary-button">
+                Já tenho uma conta
+            </a>
+        </div>
+
+    </div>
+
+    <div class="hero-card">
+
+        <div class="hero-card-header">
+            <span>Saldo disponível</span>
+            <span>Outubro</span>
+        </div>
+
+        <div class="hero-balance">
+            R$ 1.250,00
+        </div>
+
+        <div class="hero-chart">
+
+            <div class="chart-bar" style="height: 45%;"></div>
+            <div class="chart-bar" style="height: 70%;"></div>
+            <div class="chart-bar" style="height: 55%;"></div>
+            <div class="chart-bar" style="height: 85%;"></div>
+            <div class="chart-bar" style="height: 60%;"></div>
+            <div class="chart-bar" style="height: 40%;"></div>
+
+        </div>
+
+        <div class="hero-card-footer">
+            <span>Gastos do mês</span>
+            <strong>R$ 750,00</strong>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="features">
+
+    <div class="section-heading">
+        <span>FINORA</span>
+
+        <h2>
+            Simples de usar.
+            <br>
+            Feito para você.
+        </h2>
+
+        <p>
+            Tenha uma visão clara das suas finanças sem complicações.
+        </p>
+    </div>
+
+    <div class="feature-grid">
+
+        <div class="feature-card">
+            <div class="feature-icon">01</div>
+
+            <h3>Organize seus gastos</h3>
+
+            <p>
+                Registre seus gastos e classifique cada um em sua categoria.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">02</div>
+
+            <h3>Acompanhe seu dinheiro</h3>
+
+            <p>
+                Veja quanto você gastou e quanto ainda possui disponível no mês.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">03</div>
+
+            <h3>Entenda seus hábitos</h3>
+
+            <p>
+                Visualize seus gastos através de gráficos e descubra para onde
+                seu dinheiro está indo.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="cta">
+
+    <h2>
+        Comece a organizar
+        suas finanças hoje.
+    </h2>
+
+    <p>
+        Crie sua conta gratuitamente e tenha seus gastos sempre sob controle.
+    </p>
+
+    <a href="{{ url_for('cadastro') }}" class="primary-button">
+        Começar agora
+    </a>
+
+</section>
+
+{% endblock %}
